@@ -1,0 +1,8 @@
+{
+    "id": "cfgcmd",
+    "version": "1.0.0",
+    "name": "configCommand",
+    "description": "使用MCDR指令修改配置文件",
+    "author": "wangyupu",
+    "link": "https://github.com/wang-yupu/configCommand"
+}
