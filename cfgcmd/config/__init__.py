@@ -18,5 +18,6 @@ def loadConfig(serverInstance: PluginServerInterface):
         cfg = defaultConfig
         with open(os.path.join(serverInstance.get_data_folder(), 'cfgcmd.yaml'), 'w') as fileHandler:
             cfg = yaml.safe_dump(defaultConfig, fileHandler)
+        return defaultConfig
 
     return cfg

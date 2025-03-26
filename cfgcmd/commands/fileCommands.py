@@ -25,6 +25,8 @@ def setKV(source: CommandSource, ctx: CommandContext):
 
     try:
         player.set(ctx.get("key"), ctx.get("value"))
+    except KeyError:
+        source.reply(red("不存在的键"))
     except Exception as error:
         source.reply(red(f"无法修改，错误: {error}"))
     source.reply(green(f"将 {ctx.get("key")} 由 {old} 修改为 {ctx.get("value")}"))
@@ -39,8 +41,12 @@ def rmKV(source: CommandSource, ctx: CommandContext):
         source.reply(red("文件未加载"))
         return
 
-    obj = getPlayerObject(source)
-    obj.rm(ctx.get("key"))
+    try:
+        obj = getPlayerObject(source)
+        obj.rm(ctx.get("key"))
+        source.reply(green(f"删除了 {ctx.get("key")}"))
+    except KeyError:
+        source.reply(red("不存在的键"))
 
 
 def mvKV(source: CommandSource, ctx: CommandContext):
@@ -52,10 +58,13 @@ def mvKV(source: CommandSource, ctx: CommandContext):
         source.reply(red("文件未加载"))
         return
 
-    obj = getPlayerObject(source)
-    obj.mv(ctx.get('key1'), ctx.get('key2'))
+    try:
+        obj = getPlayerObject(source)
+        obj.mv(ctx.get('key1'), ctx.get('key2'))
 
-    source.reply(green(f"移动 {ctx.get('key1')} 到 {ctx.get('key2')}"))
+        source.reply(green(f"移动 {ctx.get('key1')} 到 {ctx.get('key2')}"))
+    except KeyError:
+        source.reply(red("不存在的原键"))
 
 
 def cpKV(source: CommandSource, ctx: CommandContext):
@@ -67,12 +76,13 @@ def cpKV(source: CommandSource, ctx: CommandContext):
         source.reply(red("文件未加载"))
         return
 
-    obj = getPlayerObject(source)
+    try:
+        obj = getPlayerObject(source)
+        obj.cp(ctx.get('key1'), ctx.get('key2'))
 
-    obj = getPlayerObject(source)
-    obj.cp(ctx.get('key1'), ctx.get('key2'))
-
-    source.reply(green(f"复制 {ctx.get('key1')} 到 {ctx.get('key2')}"))
+        source.reply(green(f"移动 {ctx.get('key1')} 到 {ctx.get('key2')}"))
+    except KeyError:
+        source.reply(red("不存在的原键"))
 
 
 def cdKV(source: CommandSource, ctx: CommandContext):
@@ -135,4 +145,4 @@ def lsDir(source: CommandSource, ctx: CommandContext):
 
         source.reply(t)
     except:
-        source.reply(red("目标是文件"))
+        source.reply(red("出错"))
