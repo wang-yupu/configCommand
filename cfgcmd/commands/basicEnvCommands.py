@@ -26,6 +26,11 @@ def loadEnv(source: CommandSource, ctx: CommandContext):
         source.reply(red("你没有足够的权限以使用此命令！"))
         return
 
+    obj = getPlayerObject(source)
+    if obj:
+        source.reply(red(f"请先关闭已打开的文件: {obj.file}"))
+        return
+
     dir = ctx.get("dir", None)
     file = ctx.get("file", None)
     rwMode = ctx.get("rwMode", HandlerEnum.AUTO)
@@ -50,8 +55,8 @@ def loadEnv(source: CommandSource, ctx: CommandContext):
         source.reply(red("无权限"))
     except OSError as error:
         source.reply(red("系统错误，可能是文件被占用了"))
-    except Exception as error:
-        source.reply(red(f"未捕获的错误: {error}"))
+    # except Exception as error:
+    #     source.reply(red(f"未捕获的错误: {error}"))
     else:
         failed = False
     if failed:
@@ -75,8 +80,10 @@ def quitEnv(source: CommandSource, ctx: CommandContext):
         return
     elif obj and obj.fileChangedAndNotSave:
         source.reply(orange("文件还有未保存的修改，再次输入此命令以不保存并关闭"))
+        obj.fileChangedAndQuitWithoutSave = True
     else:
         source.reply(green("成功关闭了文件"))
+        del obj
 
 
 def writeFile(source: CommandSource, ctx: CommandContext):
@@ -84,18 +91,39 @@ def writeFile(source: CommandSource, ctx: CommandContext):
         source.reply(red("你没有足够的权限以使用此命令！"))
         return
     obj = players.get(getStorageName(source), None)
-    obj.fileChangedAndNotSave = False
+    obj.write()
+    source.reply(green("成功写入文件"))
 
 
 def infoFile(source: CommandSource, ctx: CommandContext):
     if not verifyPermission(source):
         source.reply(red("你没有足够的权限以使用此命令！"))
         return
-    source.reply(orange("...info"))
+    obj = players.get(getStorageName(source), None)
+    if not obj:
+        source.reply(red("还没有打开文件"))
+        return
+
+    t = orange("--- 文件信息 ---") + endl() + white("文件: ") + aqua(obj.file) + \
+        endl() + white("使用的读写器: ") + aqua(obj.fileRW.typ)
+    source.reply(t)
+
+    if not obj.fileChangedAndNotSave:
+        return
+
+    t2 = orange("--- 暂存的修改 ---") + endl()
+    i = 0
+    for op in obj.operations:
+        t2 += gray(f"{i}. ") + white(op) + endl()
+        i += 1
+
+    source.reply(t2)
 
 
 def reloadFile(source: CommandSource, ctx: CommandContext):
     if not verifyPermission(source):
         source.reply(red("你没有足够的权限以使用此命令！"))
         return
-    source.reply(orange("...reload"))
+    obj = players.get(getStorageName(source), None)
+    obj.load()
+    source.reply(green("成功地重载了文件"))

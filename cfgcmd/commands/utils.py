@@ -1,8 +1,9 @@
 #
 from mcdreforged.minecraft.rtext.text import RText
-from mcdreforged.minecraft.rtext.style import RColor
+from mcdreforged.minecraft.rtext.style import RColor, RStyle
 from mcdreforged.command.command_source import CommandSource
 from ..shared.config import cfg
+from ..shared.playerEnv import players
 
 
 def verifyPermission(source: CommandSource):
@@ -18,6 +19,14 @@ def getStorageName(source: CommandSource):
         return source.player
     else:
         return "<UNKNOWN>"
+
+
+def getPlayerObject(source: CommandSource):
+    return players.get(getStorageName(source), None)
+
+
+def getObjectExists(source: CommandSource) -> bool:
+    return players.get(getStorageName(source), False)
 
 
 def red(text: str) -> RText:
@@ -50,3 +59,25 @@ def white(text: str) -> RText:
 
 def epic(text: str) -> RText:
     return RText(text, RColor.dark_purple)
+
+
+def darkred(text: str) -> RText:
+    return RText(text, RColor.dark_red)
+
+
+def endl() -> RText:
+    return RText("\n")
+
+
+def bold(text: str | RText):
+    if isinstance(text, RText):
+        return text.set_styles(text.__styles.add(RStyle.bold))
+    else:
+        return RText(text, RStyle.bold)
+
+
+def italic(text: str | RText):
+    if isinstance(text, RText):
+        return text.set_styles(text.__styles.add(RStyle.italic))
+    else:
+        return RText(text, RStyle.italic)

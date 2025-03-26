@@ -17,8 +17,9 @@
 - `!!cfg rm <key>`: 删除键对应的内容
 - `!!cfg mv <sourceKey> <destKey>`: 移动，也可以当重命名使用
 - `!!cfg cp <sourceKey> <destKey>`: 复制粘贴
-- `!!cfg cd <key>`: 因为配置文件是树状结构，所以就提供一个类似文件系统操作的`cd`指令。支持`..`、`./`这些相对路径。在读写器为`plain`时不可用
+(WIP) - `!!cfg cd <key>`: 因为配置文件是树状结构，所以就提供一个类似文件系统操作的`cd`指令。在读写器为`plain`时不可用
 - `!!cfg ls [可选: page]`: 查看当前Object内容。在读写器为`plain`时打印全文。每10行算一页
+- `!!cfg lsDir <路径>`: 以MCDR目录为根目录查看文件列表
 
 ---  
 
@@ -29,7 +30,6 @@
 > 若读写器为`plain`，`<key>`参数指定的就是行号
 > 若`<key>`包含空格且后面还有参数，用英文双引号把它括住。用`\`可以转义。具体见[QuotableText](https://docs.mcdreforged.com/zh-cn/latest/code_references/command.html#mcdreforged.command.builder.nodes.arguments.QuotableText)
 > `set`子命令对于`value`类型的判断: 若存在字符，则是字符串；若以双引号括住且只有数字，则是字符串；未被双引号括住且只有数字，则是数字；若只给出了`key`，则`value`是None
-> 在没有使用`env`或者`quit`了，那么`cd`、`ls`的行为会变成对文件夹的操作(但是只能浏览)，其它文件命令无效
 
 ### 示例
 
@@ -78,12 +78,10 @@
 12 }
 ```
 
-## 配置
+## 插件配置
 
 ```yaml
 ownerPlayer: 玩家名称
-configBlacklist:
-- cfgcmd
 cfgCmdPermission: 4
 ```
 

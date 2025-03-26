@@ -2,6 +2,8 @@ from . import BasicRW
 
 
 class PlainTextRW(BasicRW):
+    typ = "Plain"
+
     def __init__(self):
         self.lines = []
 
@@ -51,12 +53,21 @@ class PlainTextRW(BasicRW):
             self.lines.append('')
         self.lines[dest_index] = self.lines[src_index]
 
-    def toStringTree(self) -> str:
-        lines = ['PLAIN']
-        for i, line in enumerate(self.lines):
-            prefix = '└ ' if i == len(self.lines)-1 else '├ '
-            lines.append(f"{prefix}{i+1}: {line or '<空行>'}")
-        return '\n'.join(lines)
+    def toStringTree(self) -> list:
+        from ..commands.utils import green, bold, gray, white, orange
+        header = green(bold("PLAIN"))
+        lines = [header]
+
+        for i, line_text in enumerate(self.lines):
+            connector = gray('└── ') if i == len(self.lines)-1 else gray('├── ')
+            line_no = orange(bold(str(i+1)))
+            content = white(f": {line_text}" if line_text else ": <EMPTY>")
+
+            line = connector + line_no + content
+            line.set_hover_text(f"行 {i+1}")
+            lines.append(line)
+
+        return lines
 
     def load(self, rawContent) -> None:
         self.lines = rawContent.split('\n')

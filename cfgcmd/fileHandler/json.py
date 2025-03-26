@@ -4,6 +4,8 @@ import copy
 
 
 class JSONRW(BasicRW):
+    typ = "JSON"
+
     def __init__(self):
         self.data = {}
 
@@ -37,9 +39,12 @@ class JSONRW(BasicRW):
                 parent[last] = value
             elif isinstance(parent, list):
                 index = int(last)
-                if index >= len(parent):
-                    parent.extend([None]*(index - len(parent) + 1))
-                parent[index] = value
+                if len(parent) == index:
+                    parent.append(value)
+                else:
+                    if index >= len(parent):
+                        parent.extend([None]*(index - len(parent) + 1))
+                    parent[index] = value
             else:
                 raise KeyError("Cannot set value on non-container type")
         except Exception as e:
@@ -79,46 +84,75 @@ class JSONRW(BasicRW):
             raise KeyError(f"Source key {srcKey} not found")
         self.setByStringKey(destKey, value)
 
-    def _generate_tree(self, data, prefix='', is_last=False):
+    def getValueColored(self, value):
+        from ..commands.utils import gray, red, green, blue, white, darkred
+        if value == None:
+            return gray('None')
+        elif isinstance(value, bool):
+            return green("True") if value else red("False")
+        elif isinstance(value, int):
+            return blue(str(value))
+        elif isinstance(value, str):
+            return darkred(value)
+        else:
+            try:
+                return white(str(value))
+            except:
+                return red("???")
+
+    def _generate_tree(self, data, prefix='', is_last=False, current_key=''):
+        from ..commands.utils import gray, orange, bold, white
         lines = []
+        connector = gray('└── ') if is_last else gray('├── ')
+        next_prefix = prefix + gray('    ') if is_last else prefix + gray('│   ')
+
         if isinstance(data, dict):
-            items = list(data.items())
-            for i, (k, v) in enumerate(items):
-                new_prefix = prefix + ('└ ' if (i == len(items)-1 and is_last) else '├ ')
-                if i == len(items)-1:
-                    new_prefix = prefix + '└ '
+            for i, (k, v) in enumerate(data.items()):
+                is_last_item = i == len(data)-1
+                # 构建当前键路径（处理转义点号）
+                escaped_key = k.replace('.', '\\.')
+                new_key = f"{current_key}.{escaped_key}" if current_key else escaped_key
+                key_part = orange(bold(str(k)))
+
+                if isinstance(v, (dict, list)):
+                    line = gray(prefix) + connector + key_part
+                    # 添加完整键路径到悬浮提示
+                    hover_text = f"Object {k}\n路径: {new_key}" if isinstance(v, dict) else f"List {k}\n路径: {new_key}"
+                    line.set_hover_text(hover_text)
+                    lines.append(line)
+                    lines.extend(self._generate_tree(v, next_prefix, is_last_item, new_key))
                 else:
-                    new_prefix = prefix + '├ '
-                if isinstance(v, dict):
-                    lines.append(f"{new_prefix}Object {k}")
-                    child_prefix = prefix + ('    ' if (i == len(items)-1) else '│   ')
-                    lines.extend(self._generate_tree(v, child_prefix, i == len(items)-1))
-                elif isinstance(v, list):
-                    lines.append(f"{new_prefix}List {k}")
-                    child_prefix = prefix + ('    ' if (i == len(items)-1) else '│   ')
-                    lines.extend(self._generate_tree(v, child_prefix, i == len(items)-1))
-                else:
-                    lines.append(f"{new_prefix}{type(v).__name__} {k}: {v}")
+                    value_part = white(": ") + self.getValueColored(v)
+                    line = gray(prefix) + connector + key_part + value_part
+                    line.set_hover_text(f"{type(v).__name__} {k}\n路径: {new_key}")
+                    lines.append(line)
+
         elif isinstance(data, list):
             for i, item in enumerate(data):
-                new_prefix = prefix + ('└ ' if (i == len(data)-1 and is_last) else '├ ')
-                if isinstance(item, dict):
-                    lines.append(f"{new_prefix}List # {i} (Object)")
-                    child_prefix = prefix + ('    ' if (i == len(data)-1) else '│   ')
-                    lines.extend(self._generate_tree(item, child_prefix, i == len(data)-1))
-                elif isinstance(item, list):
-                    lines.append(f"{new_prefix}List # {i} (List)")
-                    child_prefix = prefix + ('    ' if (i == len(data)-1) else '│   ')
-                    lines.extend(self._generate_tree(item, child_prefix, i == len(data)-1))
+                is_last_item = i == len(data)-1
+                # 构建列表索引路径
+                new_key = f"{current_key}.{i}" if current_key else str(i)
+                key_part = orange(white("#")+bold(str(i)))
+
+                if isinstance(item, (dict, list)):
+                    line = gray(prefix) + connector + key_part
+                    # 添加完整键路径到悬浮提示
+                    type_desc = "Object" if isinstance(item, dict) else "List"
+                    line.set_hover_text(f"List #{i} ({type_desc})\n路径: {new_key}")
+                    lines.append(line)
+                    lines.extend(self._generate_tree(item, next_prefix, is_last_item, new_key))
                 else:
-                    lines.append(f"{new_prefix}List # {i}: {type(item).__name__} {item}")
+                    value_part = white(": ") + self.getValueColored(item)
+                    line = gray(prefix) + connector + key_part + value_part
+                    line.set_hover_text(f"List #{i}: {type(item).__name__}\n路径: {new_key}")
+                    lines.append(line)
+
         return lines
 
-    def toStringTree(self) -> str:
-        lines = ["JSON"]
-        if self.data:
-            lines.extend(self._generate_tree(self.data))
-        return '\n'.join(lines)
+    def toStringTree(self) -> list:
+        from ..commands.utils import green, bold
+        header = green(bold("JSON"))
+        return [header] + self._generate_tree(self.data) if self.data else [header]
 
     def load(self, rawContent) -> None:
         self.data = json.loads(rawContent)

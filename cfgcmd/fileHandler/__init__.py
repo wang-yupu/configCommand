@@ -3,6 +3,8 @@ from enum import Enum
 from abc import ABC, abstractmethod
 import re
 
+from mcdreforged.api.rtext import RText
+
 
 class HandlerEnum(Enum):
     AUTO = 0
@@ -22,6 +24,10 @@ def parse_key(key: str) -> list[str]:
 
 
 class BasicRW(ABC):
+    @property
+    @abstractmethod
+    def typ(self) -> str: return 'abstract'
+
     @abstractmethod
     def setByStringKey(self, key, value) -> None: ...
 
@@ -29,7 +35,7 @@ class BasicRW(ABC):
     def getByStringKey(self, key) -> any: ...
 
     @abstractmethod
-    def toStringTree(self) -> str: ...
+    def toStringTree(self) -> list[RText]: ...
 
     @abstractmethod
     def load(self, rawContent) -> None: ...
