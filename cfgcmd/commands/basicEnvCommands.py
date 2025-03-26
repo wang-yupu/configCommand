@@ -83,7 +83,7 @@ def quitEnv(source: CommandSource, ctx: CommandContext):
         return
 
     obj = players.get(getStorageName(source), None)
-    if obj and obj.fileChangedAndQuitWithoutSave:
+    if obj and obj.fileChangedAndQuitWithoutSave and obj.fileChangedAndNotSave:
         source.reply(orange("成功不保存并关闭了文件"))
         return
     elif obj and obj.fileChangedAndNotSave:
