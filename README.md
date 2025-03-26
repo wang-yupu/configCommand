@@ -23,13 +23,13 @@
 
 ---  
 
-> 执行`!!cfg env ...`后，不会占用文件
-> 执行`!!cfg info`给出当前文件信息
-> 执行`!!cfg ls`打印指针所在Object的内容
-> 读写器根据文件后缀名判断。没有后缀名或者未知后缀名的会选择使用`plain`读写器
-> 若读写器为`plain`，`<key>`参数指定的就是行号
-> 若`<key>`包含空格且后面还有参数，用英文双引号把它括住。用`\`可以转义。具体见[QuotableText](https://docs.mcdreforged.com/zh-cn/latest/code_references/command.html#mcdreforged.command.builder.nodes.arguments.QuotableText)
-> `set`子命令对于`value`类型的判断: 若存在字符，则是字符串；若以双引号括住且只有数字，则是字符串；未被双引号括住且只有数字，则是数字；若只给出了`key`，则`value`是None
+> 执行`!!cfg env ...`后，不会占用文件  
+> 执行`!!cfg info`给出当前文件信息  
+> 执行`!!cfg ls`打印指针所在Object的内容  
+> 读写器根据文件后缀名判断。没有后缀名或者未知后缀名的会选择使用`plain`读写器  
+> 若读写器为`plain`，`<key>`参数指定的就是行号  
+> 若`<key>`包含空格且后面还有参数，用英文双引号把它括住。用`\`可以转义。具体见[QuotableText](https://docs.mcdreforged.com/zh-cn/latest/code_references/command.html#mcdreforged.command.builder.nodes.arguments.QuotableText)  
+> `set`子命令对于`value`类型的判断: 若存在字符，则是字符串；若以双引号括住且只有数字，则是字符串；未被双引号括住且只有数字，则是数字；若只给出了`key`，则`value`是None  
 
 ### 示例
 
