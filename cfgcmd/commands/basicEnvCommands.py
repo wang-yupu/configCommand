@@ -4,7 +4,7 @@ from mcdreforged.command.builder.common import CommandContext
 
 from .utils import *
 
-from ..fileHandler import HandlerEnum
+from ..fileHandler import HandlerEnum, json, yaml, toml, plain
 from ..playerEnv import Player
 from ..shared.playerEnv import players
 
@@ -34,10 +34,16 @@ def loadEnv(source: CommandSource, ctx: CommandContext):
     dir = ctx.get("dir", None)
     file = ctx.get("file", None)
     rwMode = ctx.get("rwMode", HandlerEnum.AUTO)
-    source.reply(white(f"{dir} {file} {rwMode}"))
     if not (dir and file):
         source.reply(red("给出目录与文件！"))
         return
+
+    sRW = None
+    if rwMode != HandlerEnum.AUTO:
+        sRW = {HandlerEnum.JSON: json.JSONRW,
+               HandlerEnum.YAML: yaml.YAMLRW,
+               HandlerEnum.TOML: toml.TOMLRW,
+               HandlerEnum.PLAIN: plain.PlainTextRW}[rwMode]
 
     # 拼接路径
     basicDir = source.get_server().psi().get_plugin_file_path('cfgcmd')
@@ -46,7 +52,7 @@ def loadEnv(source: CommandSource, ctx: CommandContext):
 
     failed = True
     try:
-        players[getStorageName(source)] = Player(getStorageName(source), file, source.get_server().logger)
+        players[getStorageName(source)] = Player(getStorageName(source), file, source.get_server().logger, sRW)
     except FileNotFoundError as error:
         source.reply(red("文件不存在"))
     except UnicodeDecodeError as error:
@@ -55,6 +61,8 @@ def loadEnv(source: CommandSource, ctx: CommandContext):
         source.reply(red("无权限"))
     except OSError as error:
         source.reply(red("系统错误，可能是文件被占用了"))
+    except ValueError:
+        source.reply(red("无法解析配置文件"))
     # except Exception as error:
     #     source.reply(red(f"未捕获的错误: {error}"))
     else:
@@ -83,7 +91,7 @@ def quitEnv(source: CommandSource, ctx: CommandContext):
         obj.fileChangedAndQuitWithoutSave = True
     else:
         source.reply(green("成功关闭了文件"))
-        del obj
+        del players[getStorageName(source)]
 
 
 def writeFile(source: CommandSource, ctx: CommandContext):

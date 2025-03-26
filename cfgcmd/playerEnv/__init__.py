@@ -8,7 +8,7 @@ class Player:
     fileChangedAndNotSave = False
     fileChangedAndQuitWithoutSave = False
 
-    def __init__(self, playerName: str, fileTarget: str, logger: Logger):
+    def __init__(self, playerName: str, fileTarget: str, logger: Logger, specificRW=None):
         # 读取
         logger.info(f"尝试读取文件: {fileTarget}")
         self.file = fileTarget
@@ -22,19 +22,22 @@ class Player:
         self.load()
 
         # 判断文件类型
-        fileTypes = {
-            ('json',): json.JSONRW,
-            ('yaml', 'yml'): yaml.YAMLRW,
-            ('toml',): toml.TOMLRW
-        }
+        if specificRW:
+            RW = specificRW
+        else:
+            fileTypes = {
+                ('json',): json.JSONRW,
+                ('yaml', 'yml'): yaml.YAMLRW,
+                ('toml',): toml.TOMLRW
+            }
 
-        RW = plain.PlainTextRW
-        for suffixs, tRW in fileTypes.items():
-            for suffix in suffixs:
-                if fileTarget.endswith(suffix):
-                    RW = tRW
+            RW = plain.PlainTextRW
+            for suffixs, tRW in fileTypes.items():
+                for suffix in suffixs:
+                    if fileTarget.endswith(suffix):
+                        RW = tRW
 
-        logger.info(f"选择RW: {RW}")
+            logger.info(f"选择RW: {RW}")
 
         # 实例化rw
         try:
