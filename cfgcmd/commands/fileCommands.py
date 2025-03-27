@@ -126,6 +126,40 @@ def lsKV(source: CommandSource, ctx: CommandContext):
     source.reply(epic(f'----- {page} / {player.getPageCount()} -----'))
 
 
+def rmFile(source: CommandSource, ctx: CommandContext):
+    if not verifyPermission(source):
+        source.reply(red("你没有足够的权限以使用此命令！"))
+        return
+
+    file = ctx.get("file")
+    if not os.path.exists(file):
+        source.reply(red("文件不存在"))
+        return
+    try:
+        os.remove(file)
+        source.reply(green("成功移除了目标文件(无法后悔)"))
+    except:
+        source.reply(red("无法删除目标文件"))
+
+
+def touchFile(source: CommandSource, ctx: CommandContext):
+    if not verifyPermission(source):
+        source.reply(red("你没有足够的权限以使用此命令！"))
+        return
+
+    try:
+        file = ctx.get("file")
+        if os.path.exists(file):
+            source.reply(red("文件已存在"))
+            return
+        with open(file, 'w') as _:
+            pass
+    except:
+        source.reply(red("无法创建新的空文件"))
+    else:
+        source.reply(green("成功创建了新的空文件"))
+
+
 def lsDir(source: CommandSource, ctx: CommandContext):
     if not verifyPermission(source):
         source.reply(red("你没有足够的权限以使用此命令！"))
