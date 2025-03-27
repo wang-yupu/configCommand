@@ -1,6 +1,8 @@
 
 # configCommand / cfgcmd
 
+[English](/README_en.md)
+
 在游戏内使用MCDR命令修改其它插件/Mod的配置！
 
 ## 命令
