@@ -3,9 +3,14 @@ from logging import Logger
 from ..fileHandler import json, yaml, toml, plain, TypeEnum
 import math
 import re
+from ..security import verifyFilePermission, PermissionResult
 
 
 class TypeNotValidError(Exception):
+    ...
+
+
+class NoPermissionError(Exception):
     ...
 
 
@@ -15,6 +20,7 @@ class Player:
 
     def __init__(self, playerName: str, fileTarget: str, logger: Logger, specificRW=None):
         # 读取
+        self.logger = logger
         logger.info(f"尝试读取文件: {fileTarget}")
         self.file = fileTarget
 
@@ -78,6 +84,14 @@ class Player:
             self.operations.clear()
 
     def load(self):
+        pmrs = verifyFilePermission(self.file, self.playerName)
+        if pmrs != PermissionResult.PASS:
+            match pmrs:
+                case PermissionResult.NotAllowConfigThisPlugin:
+                    raise NoPermissionError("你不能修改此插件的配置文件")
+                case PermissionResult.NotAllowOutBound:
+                    raise NoPermissionError("你没有权限访问MCDR路径外的文件")
+
         try:
             with open(self.file, 'r', encoding='utf-8') as file:
                 self.fileContent = file.read()

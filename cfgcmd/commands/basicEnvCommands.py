@@ -5,7 +5,7 @@ from mcdreforged.command.builder.common import CommandContext
 from .utils import *
 
 from ..fileHandler import HandlerEnum, json, yaml, toml, plain
-from ..playerEnv import Player
+from ..playerEnv import Player, NoPermissionError
 from ..shared.playerEnv import players
 
 import os.path
@@ -64,8 +64,8 @@ def loadEnv(source: CommandSource, ctx: CommandContext):
         source.reply(red("系统错误，可能是文件被占用了"))
     except ValueError:
         source.reply(red("无法解析配置文件"))
-    # except Exception as error:
-    #     source.reply(red(f"未捕获的错误: {error}"))
+    except NoPermissionError as error:
+        source.reply(red(error))
     else:
         failed = False
     if failed:
@@ -86,6 +86,7 @@ def quitEnv(source: CommandSource, ctx: CommandContext):
     obj = players.get(getStorageName(source), None)
     if obj and obj.fileChangedAndQuitWithoutSave and obj.fileChangedAndNotSave:
         source.reply(orange("成功不保存并关闭了文件"))
+        del players[getStorageName(source)]
         return
     elif obj and obj.fileChangedAndNotSave:
         source.reply(orange("文件还有未保存的修改，再次输入此命令以不保存并关闭"))
@@ -102,6 +103,15 @@ def writeFile(source: CommandSource, ctx: CommandContext):
     obj = players.get(getStorageName(source), None)
     obj.write()
     source.reply(green("成功写入文件"))
+
+
+def wq(source: CommandSource, ctx: CommandContext):
+    if not verifyPermission(source):
+        source.reply(red("你没有足够的权限以使用此命令！"))
+        return
+
+    writeFile(source, ctx)
+    quitEnv(source, ctx)
 
 
 def infoFile(source: CommandSource, ctx: CommandContext):

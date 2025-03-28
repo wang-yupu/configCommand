@@ -4,8 +4,11 @@ import os
 import yaml
 
 defaultConfig = {
-    "ownerPlayer": None,  # WIP
-    "cfgCmdPermission": 4
+    "ownerPlayer": None,
+    "cfgCmdPermission": 4,
+    "allowModifyConfig": True,
+    "allowOutBound": False,
+    "enableLog": True
 }
 
 

@@ -26,6 +26,7 @@ def registerAllCommands(serverInstance: PluginServerInterface):
               )\
         .then(Literal("quit").runs(quitEnv))\
         .then(Literal("write").runs(writeFile))\
+        .then(Literal("wq").runs(wq))\
         .then(Literal("reload").runs(reloadFile))\
         .then(Literal("info").runs(infoFile))\
         .then(Literal("set").then(QuotableText("key").runs(setKV).then(GreedyText("value").runs(setKV))))\

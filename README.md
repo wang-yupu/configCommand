@@ -128,7 +128,19 @@
 ```yaml
 ownerPlayer: 玩家名称
 cfgCmdPermission: 4
+allowModifyConfig: true
+allowOutBound: false
+enableLog: true
+onlyOwnerPlayer: false
 ```
+
+`ownerPlayer`指定的玩家绕过所有安全控制措施。将其留空以对所有有权限的玩家进行权限控制  
+`allowModifyConfig`指定是否允许修改**本插件(`cfgcmd`)的配置**  
+`allowOutBound`指定是否允许离开`MCDR`根路径，为`false`时只能访问`MCDR`路径下的文件  
+`enableLog`指定是否启用记录功能，记录保存于*MCDR根路径*`/logs/cfgcmdLogs/<YYYY>-<mm>-<dd>_<COUNT>.log`  
+`onlyOwnerPlayer`指定是否只允许被指定的`ownerPlayer`才能使用此插件  
+
+> `allowModifyConfig`默认为`true`是为了管理员于无法访问后台的情况下也能对插件进行安全配置，建议安装后手动将其改为`false`  
 
 ## 支持的配置文件格式
 
