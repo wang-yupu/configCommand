@@ -3,7 +3,8 @@
     "version": "1.1.0",
     "name": "configCommand",
     "description": {
-        "zh_cn": "使用MCDR指令修改配置文件"
+        "zh_cn": "使用MCDR指令修改配置文件",
+        "en_us": "Modify config files with MCDR command"
     },
     "author": "wangyupu",
     "link": "https://github.com/wang-yupu/configCommand"
