@@ -3,7 +3,8 @@ from logging import Logger
 from ..fileHandler import json, yaml, toml, plain, TypeEnum
 import math
 import re
-from ..security import verifyFilePermission, PermissionResult
+from ..security import verifyFilePermission, PermissionResult, log
+from datetime import datetime
 
 
 class TypeNotValidError(Exception):
@@ -12,6 +13,10 @@ class TypeNotValidError(Exception):
 
 class NoPermissionError(Exception):
     ...
+
+
+def getTimeString():
+    return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 
 class Player:
@@ -81,11 +86,13 @@ class Player:
             raise error
         finally:
             self.fileChangedAndNotSave = False
+            log(f"[SAVE!] [{self.playerName}] [{getTimeString}]: Save changes of {self.file}")
             self.operations.clear()
 
     def load(self):
         pmrs = verifyFilePermission(self.file, self.playerName)
         if pmrs != PermissionResult.PASS:
+            log(f"[ReadOnly] [{self.playerName}] [{getTimeString}]: Reading {self.file} but no permission")
             match pmrs:
                 case PermissionResult.NotAllowConfigThisPlugin:
                     raise NoPermissionError("你不能修改此插件的配置文件")
@@ -95,6 +102,7 @@ class Player:
         try:
             with open(self.file, 'r', encoding='utf-8') as file:
                 self.fileContent = file.read()
+            log(f"[ReadOnly] [{self.playerName}] [{getTimeString}]: Readed {self.file}")
         except FileNotFoundError as error:
             self.logger.warning("文件不存在")
             raise error
@@ -273,6 +281,7 @@ class Player:
         self.fileRW.setByStringKey(key, value)
         self.fileChangedAndNotSave = True
         self.operations.append(f"set {key}: {value}")
+        log(f"[Unsaved] [{self.playerName}] [{getTimeString}]: SET K:<{key}> to V:<{value}> ")
 
     def get(self, key):
         key = self.postProcessKey(key)
@@ -286,6 +295,7 @@ class Player:
         itemPerPage = 10
         start = (page - 1) * itemPerPage
         end = start + itemPerPage
+        log(f"[ReadOnly] [{self.playerName}] [{getTimeString}]: Read current file at page {page}")
 
         return r[start:end]
 
@@ -298,6 +308,7 @@ class Player:
         self.fileRW.deleteByStringKey(key)
         self.fileChangedAndNotSave = True
         self.operations.append(f"rm {key}")
+        log(f"[Unsaved] [{self.playerName}] [{getTimeString}]: Remove key: {key}")
 
     def mv(self, source, dest):
         source = self.postProcessKey(source)
@@ -305,6 +316,7 @@ class Player:
         self.fileRW.renameKey(source, dest)
         self.fileChangedAndNotSave = True
         self.operations.append(f"mv {source} to {dest}")
+        log(f"[Unsaved] [{self.playerName}] [{getTimeString}]: Move {source} to {dest}")
 
     def cp(self, source, dest):
         source = self.postProcessKey(source)
@@ -312,3 +324,4 @@ class Player:
         self.fileRW.copyKey(source, dest)
         self.fileChangedAndNotSave = True
         self.operations.append(f"cp {source} to {dest}")
+        log(f"[Unsaved] [{self.playerName}] [{getTimeString}]: Copy {source} to {dest}")

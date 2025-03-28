@@ -2,7 +2,11 @@ from ..shared import config
 
 from mcdreforged.plugin.si.plugin_server_interface import PluginServerInterface
 import os.path
+import os
 from enum import Enum
+
+from datetime import datetime
+import time
 
 
 class PermissionResult(Enum):
@@ -30,3 +34,36 @@ def verifyFilePermission(targetFile, opPlayerName):
             return PermissionResult.NotAllowOutBound
 
     return PermissionResult.PASS
+
+
+def log(message):
+    if config.cfg.get('enableLog', False):
+        config.logsInThisSession.append(message)
+
+
+def saveLogs():
+    if config.cfg.get('enableLog', False):
+        # 文件夹是否存在
+        if not os.path.exists("./logs/cfgcmdLogs/"):
+            os.mkdir("./logs/cfgcmdLogs")
+        # 先获取目前的时间
+        tString = datetime.now().strftime('%Y-%m-%d_')
+
+        # 然后获取次数
+        files = os.listdir("./logs/cfgcmdLogs/")
+        thisCount = 0
+        for item in files:
+            if item.startswith(tString) and item.endswith(".log"):
+                # 读取里面的次数
+                try:
+                    thisCount = int(item.lstrip(tString).rstrip(".log"))
+                except ValueError:
+                    thisCount = str(int(time.time()))[2:]
+
+        # 文件名
+        fileName = f"{tString}_{thisCount+1}.log"
+        with open(os.path.join("./logs/cfgcmdLogs/", fileName), "w") as file:
+            for item in config.logsInThisSession:
+                file.write(item+"\n")
+
+        # done

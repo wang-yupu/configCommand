@@ -7,6 +7,8 @@ from .shared import config
 
 from .commands import registerAllCommands
 
+from .security import saveLogs
+
 
 def on_load(server: PluginServerInterface, _):
     server.logger.info(f"configCommand v{server.get_plugin_metadata('cfgcmd').version} 开始加载")
@@ -15,3 +17,7 @@ def on_load(server: PluginServerInterface, _):
     server.logger.info(config.cfg)
 
     registerAllCommands(server)
+
+
+def on_unload(server: PluginServerInterface):
+    saveLogs()

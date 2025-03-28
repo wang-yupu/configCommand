@@ -4,8 +4,16 @@ from mcdreforged.command.builder.common import CommandContext
 
 from .utils import *
 from ..playerEnv import TypeNotValidError
+from ..security import log
 
 import os.path
+
+
+from datetime import datetime
+
+
+def getTimeString():
+    return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 
 def setKV(source: CommandSource, ctx: CommandContext):
@@ -168,6 +176,7 @@ def rmFile(source: CommandSource, ctx: CommandContext):
         source.reply(green("成功移除了目标文件(无法后悔)"))
     except:
         source.reply(red("无法删除目标文件"))
+        log(f"[File] [{getStorageName(source)}] [{getTimeString()}] Removed: {file}")
 
 
 def touchFile(source: CommandSource, ctx: CommandContext):
@@ -186,6 +195,7 @@ def touchFile(source: CommandSource, ctx: CommandContext):
         source.reply(red("无法创建新的空文件"))
     else:
         source.reply(green("成功创建了新的空文件"))
+        log(f"[File] [{getStorageName(source)}] [{getTimeString()}] Created new empty file: {file}")
 
 
 def lsDir(source: CommandSource, ctx: CommandContext):
@@ -204,7 +214,7 @@ def lsDir(source: CommandSource, ctx: CommandContext):
         t = orange(f"lsDir: {tPath}") + endl()
         for item in lst:
             t += white(item) + endl()
-
+        log(f"[ReadOnly] [{getStorageName(source)}] [{getTimeString()}] List dir: {tPath}")
         source.reply(t)
     except:
         source.reply(red("出错"))
