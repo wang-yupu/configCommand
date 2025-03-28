@@ -1,7 +1,12 @@
 #
 from logging import Logger
-from ..fileHandler import json, yaml, toml, plain
+from ..fileHandler import json, yaml, toml, plain, TypeEnum
 import math
+import re
+
+
+class TypeNotValidError(Exception):
+    ...
 
 
 class Player:
@@ -104,19 +109,153 @@ class Player:
         else:
             return key
 
-    def set(self, key, value: str):
+    def isTypeAvailableForValue(self, value: str, type: TypeEnum) -> bool:
+        if type == TypeEnum.AUTO:
+            return ValueError("适合的类型不能为AUTO")
+        elif type == TypeEnum.STRING:
+            return True
+        elif type == TypeEnum.INT:
+            # 判断可能的小数点和负号
+            if not set(value).issubset({"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ".", "-"}):
+                return False
+            # 负号处理
+            if value.count("-") > 1:
+                return False  # 出现了多个负号
+            elif value.startswith("-"):
+                value = value.lstrip("-")
+
+            # 小数点
+            if value.count(".") > 1:
+                # 2+个小数点
+                lastDotPos = value.rfind(".")
+                value = value[:lastDotPos].replace(".", "") + value[lastDotPos:]
+            if value.startswith('.') or value.endswith('.'):
+                return False
+
+            return True
+        elif type == TypeEnum.BOOL:
+            if value.upper() in ['TRUE', 'FALSE', 'T', 'F']:
+                return True
+        elif type == TypeEnum.LIST:
+            # 返回常量
+            return True
+        elif type == TypeEnum.OBJECT:
+            KVs = re.split(r'(?!\\),', value)
+            # 检查每个键值对
+            for KV in KVs:
+                splitedKV = re.split(r'(?!\\):', KV)
+                if len(splitedKV) != 2:
+                    return False
+            return True
+        elif type == TypeEnum.NONE:
+            return True
+
+    def pyTypeToEnum(self, value: any) -> TypeEnum:
+        if isinstance(value, str):
+            return TypeEnum.STRING
+        elif isinstance(value, int) or isinstance(value, float):
+            return TypeEnum.INT
+        elif isinstance(value, bool):
+            return TypeEnum.BOOL
+        elif isinstance(value, list) or isinstance(value, set):
+            return TypeEnum.LIST
+        elif isinstance(value, dict):
+            return TypeEnum.OBJECT
+        elif value == None:
+            return TypeEnum.NONE
+
+    def convertValue(self, value: str, type: TypeEnum):
+        match type:
+            case TypeEnum.STRING:
+                return str(value)
+            case TypeEnum.INT:
+                if self.isTypeAvailableForValue(value, type):
+                    # 处理数字
+                    intIsNegative = False
+                    if value.startswith('-'):
+                        intIsNegative = True
+                        value.lstrip("-")
+
+                    # 小数点
+                    if value.count(".") > 1:
+                        # 2+个小数点
+                        lastDotPos = value.rfind(".")
+                        value = value[:lastDotPos].replace(".", "") + value[lastDotPos:]
+                    if value.startswith('.') or value.endswith('.'):
+                        return str(value)
+
+                    return -int(value) if intIsNegative else int(value)
+                else:
+                    return str(value)
+            case TypeEnum.BOOL:
+                if value.upper() in ['TRUE', 'FALSE', 'T', 'F'] and self.isTypeAvailableForValue(value, type):
+                    if value.upper().startswith("T"):
+                        return True
+                    elif value.upper().startswith("F"):
+                        return False
+                return str(value)
+            case TypeEnum.LIST:
+                if self.isTypeAvailableForValue(value, type):
+                    return re.split(r'(?!\\),', value)
+                return str(value)
+            case TypeEnum.OBJECT:
+                if self.isTypeAvailableForValue(value, type):
+                    KVs = re.split(r'(?!\\),', value)
+                    result = {}
+                    for item in KVs:
+                        k, v = re.split(r'(?!\\):', item)
+                        result[k] = v
+                    return result
+            case TypeEnum.NONE:
+                return None
+
+        return str(value)
+
+    def autoType(self, value: str, rValue: any, typed: TypeEnum):
+        print(rValue)
+        if typed != TypeEnum.AUTO and typed != None:  # 指定类型
+            if self.isTypeAvailableForValue(value, typed):
+                return self.convertValue(value, typed)
+            else:
+                raise TypeNotValidError("无法转换为目标类型")
+
+        # 开始类型推导
+        # 1. 原先值是否不存在或值为None?
+        if rValue:  # 原值存在
+            rValueType = self.pyTypeToEnum(rValue)
+            if self.isTypeAvailableForValue(value, rValueType):
+                # 类型转换，使用原类型
+                return self.convertValue(value, rValueType)
+        if value == 'None':
+            return None
+
+        # 2. 是否是布尔值?
+        if value.upper() in ["T", "TRUE", 'F', "FALSE"]:
+            return self.convertValue(value, TypeEnum.BOOL)
+
+        # 3. 包含非数字字符(小数点、负号除外)?
+        if not set(value).issubset({"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", ".", "-", '"'}):
+            return str(value)  # 结束
+
+        # 4. 不完全是字符串
+        if value.count('"') == 2 and value.startswith('"') and value.endswith('"'):
+            return str(self.convertValue(value.strip('"'), TypeEnum.INT))
+
+        # 5. 那就是数字了
+        if self.isTypeAvailableForValue(value, TypeEnum.INT):
+            return self.convertValue(value, TypeEnum.INT)
+
+        # 6. ?
+        return str(value)
+
+    def set(self, key, value: str, typed: TypeEnum = None):
         key = self.postProcessKey(key)
-
         # 处理数据类型
-        r = self.fileRW.getByStringKey(key)
-        if isinstance(r, int) and value.isdigit():
-            value = int(value)
-        elif isinstance(r, bool) and value.upper() in ['TRUE', 'FALSE', 'T', 'F']:
-            if value.upper().startswith("T"):
-                value = True
-            elif value.upper().startswith("F"):
-                value = False
-
+        try:
+            rValue = self.get(key)
+        except KeyError:
+            rValue = None
+        value = self.autoType(value, rValue, typed)
         self.fileRW.setByStringKey(key, value)
         self.fileChangedAndNotSave = True
         self.operations.append(f"set {key}: {value}")

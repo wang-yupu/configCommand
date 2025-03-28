@@ -2,7 +2,7 @@
 from mcdreforged.plugin.si.plugin_server_interface import PluginServerInterface
 
 from ..shared import config
-from ..fileHandler import HandlerEnum
+from ..fileHandler import HandlerEnum, TypeEnum
 
 from .basicEnvCommands import *
 from .fileCommands import *
@@ -29,6 +29,7 @@ def registerAllCommands(serverInstance: PluginServerInterface):
         .then(Literal("reload").runs(reloadFile))\
         .then(Literal("info").runs(infoFile))\
         .then(Literal("set").then(QuotableText("key").runs(setKV).then(GreedyText("value").runs(setKV))))\
+        .then(Literal("setTyped").then(QuotableText("key").then(Enumeration("type", TypeEnum).then(GreedyText("value").runs(setKVTyped)))))\
         .then(Literal("rm").then(GreedyText('key').runs(rmKV)))\
         .then(Literal("mv").then(QuotableText('key1').then(QuotableText('key2').runs(mvKV))))\
         .then(Literal("cp").then(QuotableText('key1').then(QuotableText('key2').runs(cpKV))))\

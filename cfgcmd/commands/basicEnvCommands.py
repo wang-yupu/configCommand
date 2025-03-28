@@ -18,7 +18,7 @@ def printHelp(source: CommandSource, ctx: CommandContext):
         return
     source.reply(epic("< --- cfgcmd 可用命令 --- >"))
     source.reply(orange("基本: ")+white("env quit write reload info"))
-    source.reply(orange("键值对操作: ")+white("set rm mv cp cd ls"))
+    source.reply(orange("键值对操作: ")+white("set setTyped rm mv cp cd ls"))
     source.reply(orange("文件操作: ")+white("lsDir rmFile touchFile"))
 
 

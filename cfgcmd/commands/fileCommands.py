@@ -3,6 +3,7 @@ from mcdreforged.command.command_source import CommandSource
 from mcdreforged.command.builder.common import CommandContext
 
 from .utils import *
+from ..playerEnv import TypeNotValidError
 
 import os.path
 
@@ -30,6 +31,33 @@ def setKV(source: CommandSource, ctx: CommandContext):
     except Exception as error:
         source.reply(red(f"无法修改，错误: {error}"))
     source.reply(green(f"将 {ctx.get("key")} 由 {old} 修改为 {ctx.get("value")}"))
+
+
+def setKVTyped(source: CommandSource, ctx: CommandContext):
+    if not verifyPermission(source):
+        source.reply(red("你没有足够的权限以使用此命令！"))
+        return
+
+    if not getObjectExists(source):
+        source.reply(red("文件未加载"))
+        return
+
+    player = getPlayerObject(source)
+
+    try:
+        old = player.get(ctx.get("key"))
+    except:
+        old = "无"
+
+    try:
+        player.set(ctx.get("key"), ctx.get("value"), ctx.get('type'))
+    except KeyError:
+        source.reply(red("不存在的键"))
+    except TypeNotValidError:
+        source.reply(red(f"无法将类型 {ctx.get('type')} 应用于值上"))
+    except Exception as error:
+        source.reply(red(f"无法修改，错误: {error}"))
+    source.reply(green(f"将 {ctx.get("key")} 由 {old} 修改为 {ctx.get("value")}，指定了类型: {ctx.get('type').name}"))
 
 
 def rmKV(source: CommandSource, ctx: CommandContext):

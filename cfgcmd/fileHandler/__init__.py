@@ -15,6 +15,16 @@ class HandlerEnum(Enum):
     PLAIN = 4
 
 
+class TypeEnum(Enum):
+    STRING = 0
+    INT = 1
+    BOOL = 2
+    LIST = 3
+    OBJECT = 4
+    NONE = 5
+    AUTO = 6
+
+
 __all__ = ['BasicRW', 'JSONRW', 'YAMLRW', 'TOMLRW', 'PlainTextRW']
 
 
