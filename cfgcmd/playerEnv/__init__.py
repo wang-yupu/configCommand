@@ -287,20 +287,18 @@ class Player:
         key = self.postProcessKey(key)
         return self.fileRW.getByStringKey(key)
 
-    def ls(self, page):
+    def ls(self, page, itemPerPage=10):
         r = self.fileRW.toStringTree()
         if page < 1:
             raise ValueError("无效页数")
 
-        itemPerPage = 10
         start = (page - 1) * itemPerPage
         end = start + itemPerPage
         log(f"[ReadOnly] [{self.playerName}] [{getTimeString}]: Read current file at page {page}")
 
         return r[start:end]
 
-    def getPageCount(self) -> int:
-        itemPerPage = 10
+    def getPageCount(self, itemPerPage=10) -> int:
         return math.ceil(len(self.fileRW.toStringTree())/itemPerPage)
 
     def rm(self, key):

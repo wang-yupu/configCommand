@@ -146,18 +146,19 @@ def lsKV(source: CommandSource, ctx: CommandContext):
 
     player = getPlayerObject(source)
     page = ctx.get('page', None)
+    linePerPage = ctx.get('linePerPage', 10)
     if not page:
         page = 1
     elif page < 1:
         source.reply(red("无效页数"))
         return
 
-    elif page > player.getPageCount():
+    elif page > player.getPageCount(linePerPage):
         source.reply(red(f"页数过大, 此文件只有 {player.getPageCount()} 页"))
         return
 
     source.reply(epic(f"--- 查看 第{page}页 ---"))
-    for line in player.ls(page):
+    for line in player.ls(page, linePerPage):
         source.reply(line)
     source.reply(epic(f'----- {page} / {player.getPageCount()} -----'))
 

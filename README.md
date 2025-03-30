@@ -25,7 +25,8 @@
 - `!!cfg mv <sourceKey> <destKey>`: 移动，也可以当重命名使用
 - `!!cfg cp <sourceKey> <destKey>`: 复制粘贴
 - `!!cfg cd <key>`: 因为配置文件是树状结构，所以就提供一个类似文件系统操作的`cd`指令。在读写器为`plain`时不可用
-- `!!cfg ls [可选: page]`: 查看当前Object内容。在读写器为`plain`时打印全文。每10行算一页
+- `!!cfg ls [可选: page] [需要前项存在: key]`: 查看当前Object内容。在读写器为`plain`时打印全文。每10行算一页
+- `!!cfg lsLong [必选: page] [可选: linePerPage] [需要前项存在: key]`: 同上
 
 ---  
 

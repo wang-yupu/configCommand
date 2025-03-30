@@ -36,6 +36,7 @@ def registerAllCommands(serverInstance: PluginServerInterface):
         .then(Literal("cp").then(QuotableText('key1').then(QuotableText('key2').runs(cpKV))))\
         .then(Literal("cd").then(GreedyText('key').runs(cdKV)))\
         .then(Literal("ls").runs(lsKV).then(Integer('page').runs(lsKV).then(GreedyText('key').runs(lsKV))))\
+        .then(Literal("lsLong").runs(lsKV).then(Integer('page').then(Integer('linePerPage').runs(lsKV).then(GreedyText('key').runs(lsKV)))))\
         .then(Literal("lsDir").runs(lsDir).then(GreedyText("path").runs(lsDir)))\
         .then(Literal("rmFile").then(GreedyText("file").runs(rmFile)))\
         .then(Literal("touch").then(GreedyText("file").runs(touchFile)))
