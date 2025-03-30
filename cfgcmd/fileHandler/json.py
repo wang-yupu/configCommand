@@ -85,13 +85,16 @@ class JSONRW(BasicRW):
         self.setByStringKey(destKey, value)
 
     def getValueColored(self, value):
-        from ..commands.utils import gray, red, green, blue, white, darkred
+        from ..commands.utils import gray, red, green, blue, white, darkred, bold
         if value == None:
             return gray('None')
         elif isinstance(value, bool):
             return green("True") if value else red("False")
         elif isinstance(value, int):
             return blue(str(value))
+        elif isinstance(value, float):
+            integer, fractional = str(value).split(".")
+            return blue(integer) + bold(green(".")) + blue(fractional)
         elif isinstance(value, str):
             return darkred(value)
         else:
