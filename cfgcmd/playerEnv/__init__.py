@@ -203,10 +203,14 @@ class Player:
                         # 2+个小数点
                         lastDotPos = value.rfind(".")
                         value = value[:lastDotPos].replace(".", "") + value[lastDotPos:]
+
+                    factoryFunction = int
+                    if value.count(".") != 0:
+                        factoryFunction = float
                     if value.startswith('.') or value.endswith('.'):
                         return str(value)
 
-                    return -int(value) if intIsNegative else int(value)
+                    return -factoryFunction(value) if intIsNegative else factoryFunction(value)
                 else:
                     return str(value)
             case TypeEnum.BOOL:
