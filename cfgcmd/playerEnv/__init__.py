@@ -282,10 +282,14 @@ class Player:
         except KeyError:
             rValue = None
         value = self.autoType(value, rValue, typed)
+        ext = None
+        if isinstance(value, float):
+            ext = "浮点数"
         self.fileRW.setByStringKey(key, value)
         self.fileChangedAndNotSave = True
         self.operations.append(f"set {key}: {value}")
         log(f"[Unsaved] [{self.playerName}] [{getTimeString}]: SET K:<{key}> to V:<{value}> ")
+        return ext
 
     def get(self, key):
         key = self.postProcessKey(key)
