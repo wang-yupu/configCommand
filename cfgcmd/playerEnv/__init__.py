@@ -238,7 +238,6 @@ class Player:
         return str(value)
 
     def autoType(self, value: str, rValue: any, typed: TypeEnum):
-        print(rValue)
         if typed != TypeEnum.AUTO and typed != None:  # 指定类型
             if self.isTypeAvailableForValue(value, typed):
                 return self.convertValue(value, typed)
@@ -289,7 +288,7 @@ class Player:
         self.fileChangedAndNotSave = True
         self.operations.append(f"set {key}: {value}")
         log(f"[Unsaved] [{self.playerName}] [{getTimeString}]: SET K:<{key}> to V:<{value}> ")
-        return ext
+        return ext, value
 
     def get(self, key):
         key = self.postProcessKey(key)

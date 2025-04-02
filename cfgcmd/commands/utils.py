@@ -69,15 +69,15 @@ def endl() -> RText:
     return RText("\n")
 
 
-def bold(text: str | RText):
-    if isinstance(text, RText):
-        return text.set_styles(text.__styles.add(RStyle.bold))
+def bold(text: str | RText, color: RColor = None):
+    if color:
+        return RText(text).set_styles({RStyle.bold, color})
     else:
         return RText(text, RStyle.bold)
 
 
-def italic(text: str | RText):
-    if isinstance(text, RText):
-        return text.set_styles(text.__styles.add(RStyle.italic))
+def italic(text: str | RText, color: RColor = None):
+    if color:
+        return RText(text).set_styles({RStyle.italic, color})
     else:
         return RText(text, RStyle.italic)

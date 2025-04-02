@@ -33,13 +33,13 @@ def setKV(source: CommandSource, ctx: CommandContext):
         old = "无"
 
     try:
-        ext = player.set(ctx.get("key"), ctx.get("value"))
+        ext, value = player.set(ctx.get("key"), ctx.get("value"))
     except KeyError:
         source.reply(red("不存在的键"))
     except Exception as error:
         source.reply(red(f"无法修改，错误: {error}"))
     else:
-        source.reply(green(f"将 {ctx.get("key")} 由 {old} 修改为 {ctx.get("value")} {'('+ext+')' if ext else None}"))
+        source.reply(green(f"将 {ctx.get("key")} 由 {old} 修改为 {value} {'('+ext+')' if ext else ''}"))
 
 
 def setKVTyped(source: CommandSource, ctx: CommandContext):
@@ -59,16 +59,16 @@ def setKVTyped(source: CommandSource, ctx: CommandContext):
         old = "无"
 
     try:
-        ext = player.set(ctx.get("key"), ctx.get("value"), ctx.get('type'))
+        ext, value = player.set(ctx.get("key"), ctx.get("value"), ctx.get('type'))
     except KeyError:
         source.reply(red("不存在的键"))
     except TypeNotValidError:
-        source.reply(red(f"无法将类型 {ctx.get('type')} 应用于值上"))
+        source.reply(red(f"无法将类型 {ctx.get('type').name} 应用于值上"))
     except Exception as error:
         source.reply(red(f"无法修改，错误: {error}"))
     else:
         source.reply(
-            green(f"将 {ctx.get("key")} 由 {old} 修改为 {ctx.get("value")}，指定了类型: {ctx.get('type').name} {'('+ext+')' if ext else None}"))
+            green(f"将 {ctx.get("key")} 由 {old} 修改为 {value}，指定了类型: {ctx.get('type').name} {'('+ext+')' if ext else ''}"))
 
 
 def rmKV(source: CommandSource, ctx: CommandContext):

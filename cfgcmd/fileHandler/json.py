@@ -85,7 +85,7 @@ class JSONRW(BasicRW):
         self.setByStringKey(destKey, value)
 
     def getValueColored(self, value):
-        from ..commands.utils import gray, red, green, blue, white, darkred, bold
+        from ..commands.utils import gray, red, green, blue, white, darkred, bold, RColor
         if value == None:
             return gray('None')
         elif isinstance(value, bool):
@@ -94,7 +94,7 @@ class JSONRW(BasicRW):
             return blue(str(value))
         elif isinstance(value, float):
             integer, fractional = str(value).split(".")
-            return blue(integer) + bold(green(".")) + blue(fractional)
+            return blue(integer) + bold(".", RColor.green) + blue(fractional)
         elif isinstance(value, str):
             return darkred(value)
         else:
@@ -104,7 +104,7 @@ class JSONRW(BasicRW):
                 return red("???")
 
     def _generate_tree(self, data, prefix='', is_last=False, current_key=''):
-        from ..commands.utils import gray, orange, bold, white
+        from ..commands.utils import gray, orange, bold, white, RColor
         lines = []
         connector = gray('└── ') if is_last else gray('├── ')
         next_prefix = prefix + gray('    ') if is_last else prefix + gray('│   ')
@@ -115,19 +115,19 @@ class JSONRW(BasicRW):
                 # 构建当前键路径（处理转义点号）
                 escaped_key = k.replace('.', '\\.')
                 new_key = f"{current_key}.{escaped_key}" if current_key else escaped_key
-                key_part = orange(bold(str(k)))
+                key_part = bold(str(k), RColor.gold)
 
                 if isinstance(v, (dict, list)):
                     line = gray(prefix) + connector + key_part
                     # 添加完整键路径到悬浮提示
-                    hover_text = f"Object {k}\n路径: {new_key}" if isinstance(v, dict) else f"List {k}\n路径: {new_key}"
+                    hover_text = f"Object {k}\nPath: {new_key}" if isinstance(v, dict) else f"List {k}\nPath: {new_key}"
                     line.set_hover_text(hover_text)
                     lines.append(line)
                     lines.extend(self._generate_tree(v, next_prefix, is_last_item, new_key))
                 else:
                     value_part = white(": ") + self.getValueColored(v)
                     line = gray(prefix) + connector + key_part + value_part
-                    line.set_hover_text(f"{type(v).__name__} {k}\n路径: {new_key}")
+                    line.set_hover_text(f"{type(v).__name__} {k}\nPath: {new_key}")
                     lines.append(line)
 
         elif isinstance(data, list):
@@ -141,20 +141,20 @@ class JSONRW(BasicRW):
                     line = gray(prefix) + connector + key_part
                     # 添加完整键路径到悬浮提示
                     type_desc = "Object" if isinstance(item, dict) else "List"
-                    line.set_hover_text(f"List #{i} ({type_desc})\n路径: {new_key}")
+                    line.set_hover_text(f"List #{i} ({type_desc})\nPath: {new_key}")
                     lines.append(line)
                     lines.extend(self._generate_tree(item, next_prefix, is_last_item, new_key))
                 else:
                     value_part = white(": ") + self.getValueColored(item)
                     line = gray(prefix) + connector + key_part + value_part
-                    line.set_hover_text(f"List #{i}: {type(item).__name__}\n路径: {new_key}")
+                    line.set_hover_text(f"List #{i}: {type(item).__name__}\nPath: {new_key}")
                     lines.append(line)
 
         return lines
 
     def toStringTree(self) -> list:
-        from ..commands.utils import green, bold
-        header = green(bold("JSON"))
+        from ..commands.utils import green, bold, RColor
+        header = bold("JSON", RColor.green)
         return [header] + self._generate_tree(self.data) if self.data else [header]
 
     def load(self, rawContent) -> None:
