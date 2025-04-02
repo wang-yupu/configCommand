@@ -1,6 +1,6 @@
 {
     "id": "cfgcmd",
-    "version": "1.2.4",
+    "version": "1.2.5",
     "name": "configCommand",
     "description": {
         "zh_cn": "使用MCDR指令修改配置文件",
