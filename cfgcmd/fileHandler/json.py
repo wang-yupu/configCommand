@@ -113,7 +113,7 @@ class JSONRW(BasicRW):
             for i, (k, v) in enumerate(data.items()):
                 is_last_item = i == len(data)-1
                 # 构建当前键路径（处理转义点号）
-                escaped_key = k.replace('.', '\\.')
+                escaped_key = str(k).replace('.', '\\.')
                 new_key = f"{current_key}.{escaped_key}" if current_key else escaped_key
                 key_part = bold(str(k), RColor.gold)
 
