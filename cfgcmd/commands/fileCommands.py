@@ -3,7 +3,7 @@ from mcdreforged.command.command_source import CommandSource
 from mcdreforged.command.builder.common import CommandContext
 
 from .utils import *
-from ..playerEnv import TypeNotValidError, applyResult
+from ..playerEnv import TypeNotValidError, StartSessionResult
 from ..security import log, allowCloudFunction
 
 import os.path
@@ -258,15 +258,15 @@ def startEditor(source: CommandSource, ctx: CommandContext):
     log(f"[Editor] [{getStorageName(source)}] [{getTimeString()}] [{player.file}] start a new editor session.")
 
     result = player.startSession(source.reply)
-    if result == 0:
+    if result == StartSessionResult.unsavedChanges:
         source.reply(red("还存在未保存的修改，使用")+darkred("!!cfg write (保存修改)")+red("或")+darkred("!!cfg reload (丢弃修改)"))
-    elif result == 1:
+    elif result == StartSessionResult.alreadyOpenSession:
         source.reply(red("已经打开了一个编辑器会话"))
         url = player.cloudSession.getEditorURL()
         urlRText = RText.from_json_object({"text": url, "color": 'blue', "underlined": True,
                                           "clickEvent": {"action": "open_url", "value": url}})
         source.reply(RText("当前会话链接: ", RColor.green)+urlRText+RText("(点击以打开)", RColor.gray))
-    elif result == 4:
+    elif result == StartSessionResult.tooLarge:
         source.reply(red("文件过大，需要小于8MiB才可使用在线编辑器"))
 
 
