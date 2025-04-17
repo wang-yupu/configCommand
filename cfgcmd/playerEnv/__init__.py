@@ -209,10 +209,13 @@ class Player:
                                 replyFunction(red("遇到了限速，请稍后再试: 500 RPD , 80 RPH"))
                             case applyResult.UNREADY:
                                 replyFunction(red("会话还未就绪"))
+                    self.lock.release()
                 else:
                     replyFunction(red("会话未就绪"))
+                    self.lock.release()
             else:
                 replyFunction(red("会话不存在"))
+                self.lock.release()
         else:
             replyFunction(RText("编辑器交互锁被占用，请稍等", RColor.red))
 
@@ -228,6 +231,7 @@ class Player:
                     replyFunction(red("会话未就绪"))
             else:
                 replyFunction(red("会话不存在"))
+            self.lock.release()
         else:
             replyFunction(RText("编辑器交互锁被占用，请稍等", RColor.red))
 

@@ -1,85 +1,98 @@
 # configCommand / cfgcmd
 
 [简体中文](/README.md)
+[Link](https://cfgcmd.wangyupu.com)
 
-Use MCDR commands modify plugin/mod config in-game!
+> Still translated by gpt-4o
 
-> ALL TRANSLATED BY GPT-4o
+Use MCDR commands in the game to modify configurations of other plugins/Mods!
 
-## Permissions  
+**Version `1.3.1` supports online editor**
 
-Currently, this plugin allows all permitted players in the configuration (MCDR level 4 permission) to use it. This plugin can modify **any file that the user running the MCDR process has permission to modify** (especially `root`). Therefore, **please manage permissions carefully or run the server inside a container**.  
+## Permissions
 
-## Commands  
+Currently, the plugin allows all players with permissions to modify the configuration (MCDR level 4). This plugin can modify **all files that the user running the MCDR process has access to** (especially `root`), so **please control permissions or run the server in a container**.
 
-- `!!cfg env <path (relative to MCDR root, absolute/relative paths are allowed)> <config file> [optional: reader/writer type]`: Set the target file for modification.  
-- `!!cfg quit`: Clear the target file for the executor.  
-- `!!cfg write`: Save changes to the target file.  
-- `!!cfg reload`: Reload the target file (overwriting all unsaved modifications).  
-- `!!cfg info`: Display file information.  
+## Commands
 
----  
+- `!!cfg env <path, starting from the MCDR root path, can be absolute/relative path> <config file> [optional: reader type]`: Set the target file modified by the executor
+- `!!cfg quit`: Clear the executor's target file
+- `!!cfg write`: Write to the target file
+- `!!cfg reload`: Reload the target file (overwrites all previous modifications)
+- `!!cfg info`: View file information
 
-- `!!cfg set <key> <value>`: Set a key-value pair. Keys separated by `.` are interpreted as a configuration tree path (see examples below). The `key` parameter does not support relative paths like `..`.  
-- `!!cfg setTyped <key> <type> <value>`: See the "Data Types" section below. If the value cannot be interpreted as the specified type, it defaults to `STRING`.  
-- `!!cfg rm <key>`: Delete the specified key.  
-- `!!cfg mv <sourceKey> <destKey>`: Move or rename a key.  
-- `!!cfg cp <sourceKey> <destKey>`: Copy and paste a key.  
-- `!!cfg cd <key>`: Since configuration files are tree-structured, this command allows navigation like a filesystem. Not available for the `plain` reader/writer type.  
-- `!!cfg ls [optional: page]`: List the current object’s content. For `plain` reader/writer type, prints the full text. Each page contains 10 lines.  
+---
 
----  
+- `!!cfg set <key> <value>`: Set a key-value pair, where `<key>` uses `.` to separate paths in the configuration tree (see the example below). This command does not support relative paths like `..` in the `key`. See the "Types" section below for types.
+- `!!cfg setTyped <key> <type> <value>`: See the "Types" section below. If the value cannot be interpreted as the specified type, it will default to `STRING`.
+- `!!cfg rm <key>`: Delete the key's content
+- `!!cfg mv <sourceKey> <destKey>`: Move or rename
+- `!!cfg cp <sourceKey> <destKey>`: Copy and paste
+- `!!cfg cd <key>`: Since configuration files are tree-structured, this command provides a file-system-like `cd` operation. Not available when the reader is `plain`.
+- `!!cfg ls [optional: page] [require prior key]: View the content of the current object. When the reader is `plain`, the entire file is printed. Each page contains 10 lines.
+- `!!cfg lsLong [required: page] [optional: lines per page] [require prior key]`: Same as the previous command
 
-- `!!cfg lsDir <path>`: List files in a directory relative to the MCDR root.  
-- `!!cfg rmFile <file>`: Delete a file (**irreversible**).  
-- `!!cfg touchFile <file>`: Create an **empty** file.  
+---
 
----  
+- `!!cfg lsDir <path>`: View a list of files starting from the MCDR root directory
+- `!!cfg rmFile <file>`: Delete a file (**cannot be undone**)
+- `!!cfg touchFile <file>`: Create an **empty** file
 
-> Running `!!cfg env ...` does not lock the file.  
-> Running `!!cfg info` displays the current file information.  
-> Running `!!cfg ls` prints the content of the current object pointer.  
-> The reader/writer type is determined by the file extension. Files without an extension or with an unknown extension default to the `plain` reader/writer.  
-> If the reader/writer type is `plain`, `<key>` refers to a line number.  
-> If `<key>` contains spaces and is followed by parameters, enclose it in double quotes. Use `\` for escaping. See [QuotableText](https://docs.mcdreforged.com/en-us/latest/code_references/command.html#mcdreforged.command.builder.nodes.arguments.QuotableText) for details.  
+---
 
-### Data Types  
+- `!!cfg editor`: Open the online editor for the current file, requires setting `enableCloud` to `true`
+- `!!cfg editorApply`: Synchronize the modified configuration file from the cloud
+- `!!cfg editorDelete`: Delete the cloud session
 
-`setTyped` allows specifying a value’s data type. The following types are supported, some with special behavior:  
+> If upgrading from version `1.3.1` or below, you need to manually add `enableCloud: true` to your configuration file to use the online editor.
 
-- `STRING`: Basic string.  
-- `INT`: Numeric value, including floating-point numbers (`float`).  
-- `BOOL`: Boolean value, case-insensitive. Valid inputs: `T`, `True` (true), `F`, `False` (false).  
-- `LIST`: List.  
-- `OBJECT`: Equivalent to JavaScript’s `Object`, Python’s `dict`, and YAML’s `mapping`.  
-- `AUTO`: Equivalent to using the `set` command directly.  
+---
 
-#### Special Behavior of `LIST` and `OBJECT`  
+> After executing `!!cfg env ...`, the file will not be locked  
+> Executing `!!cfg info` will display the current file information  
+> Executing `!!cfg ls` will print the content of the object where the pointer is located  
+> The reader is determined by the file extension. Files with no extension or unknown extensions will use the `plain` reader  
+> When the reader is `plain`, the `<key>` parameter specifies the line number  
+> If the `<key>` contains spaces and is followed by other parameters, wrap it in double quotes. Use `\` to escape. See [QuotableText](https://docs.mcdreforged.com/zh-cn/latest/code_references/command.html#mcdreforged.command.builder.nodes.arguments.QuotableText)
 
-##### `LIST`  
+### Number Types
 
-Values are split using a comma (`,`). Use `\` to escape commas if necessary. Items are automatically type-inferred and stored in a list. An empty value creates an empty list.  
+`setTyped` can specify the type of a value. The following types are available, and some types have special behaviors:
 
-##### `OBJECT`  
+- `STRING`: Basic string
+- `INT`: Number, including floating-point numbers (`float`)
+- `BOOL`: Boolean value, case-insensitive, but must be either `T`/`True` (true) or `F`/`False` (false)
+- `LIST`: List
+- `OBJECT`: JS `Object`, Python `dict`, YAML `mapping`
+- `AUTO`: This type directly uses the `set` command
 
-Similar to `LIST`, values are split using commas, and key-value pairs are further split by colons (`:`). Use `\` to escape commas if necessary. Items are automatically type-inferred (both keys and values) and stored as an `OBJECT`. An empty value creates an empty `OBJECT`.  
-> Using `setTyped OBJECT ...` is not recommended due to chat input limitations. It is better suited for creating empty `OBJECT`s.  
+#### Special Behavior for `LIST` and `OBJECT`
 
-#### Type Inference  
+##### `LIST`
 
-All inferred types follow this logic:  
+The input value is split by commas, and you can escape commas with `\` to avoid incorrect splitting. After splitting, each item will be type-inferred and a list will be created. If the value is empty, an empty list is created.
 
-1. If the original value does not exist or is `None` (case-sensitive), start automatic inference; otherwise, use the original type if applicable.  
-2. Convert the value to uppercase. If it matches [`T`, `TRUE`, `F`, `FALSE`], it is a boolean. Otherwise, proceed.  
-3. If the value contains non-numeric characters (excluding decimal points, negative signs, and double quotes), it is a string. Otherwise, proceed to step 4.  
-4. If the value is enclosed in double quotes, remove the quotes and repeat step 5. Otherwise, continue.  
-5. If the value consists entirely of digits (with optional decimal points and leading signs), it is a number (decimal point placement is determined by the last occurrence). Otherwise, it is a string.  
+##### `OBJECT`
 
-> `LIST` and `OBJECT` do not participate in this inference process, meaning automatic inference never results in `LIST` or `OBJECT`.  
+Similar to `LIST`, the input value is split by commas and then split into key-value pairs using `:`. Commas can also be escaped with `\` to avoid incorrect splitting. The items will be type-inferred (both keys and values) and an `OBJECT` will be created. If the value is empty, an empty `OBJECT` will be created.  
+> It is not recommended to use `setTyped OBJECT ...`, as it can encounter input restrictions in chat. It is better to use it only for creating empty `OBJECT`s.
 
-### Example  
+#### Type Inference
 
-Original configuration file:  
+All inferred types follow a common logic:
+
+1. If the value doesn't exist or is `None` (case-sensitive), it will start automatic inference, otherwise it will use the existing type.
+2. If the value (in uppercase) matches one of `T`, `TRUE`, `F`, or `FALSE`, it is a boolean value.
+3. If the value contains non-numeric characters (other than decimal points, negative signs, or double quotes), it is a string.
+4. If the value is enclosed in double quotes, it is a string representation of a number. Remove the surrounding double quotes and proceed to step 5.
+5. If it consists only of numbers (including possible decimals or signs), it is considered a number.
+6. Otherwise, it is a string.
+
+> `LIST` and `OBJECT` are not involved in this inference process, so automatic inference won't result in `LIST` or `OBJECT`.
+
+### Example
+
+Original configuration file:
 
 ```json
 1  {
@@ -94,20 +107,20 @@ Original configuration file:
 10         "wangyupu","zzfx1166"
 11     ]
 12 }
-```  
+```
 
-Commands (in order):  
+Commands (in order):
 
-1. `!!cfg env "config/foo/" bar.json`: Open file.  
-2. `!!cfg set foo 1231`: Change line 2 value to 1231.  
-3. `!!cfg set bar.barFoo "!"`: Change line 4 value to `"!"`.  
-4. `!!cfg rm buzz.1`: Remove the second item (0-based index) from the list at line 10.  
-5. `!!cfg cd bar.barBar`: Move the pointer to the `barBar` object at line 5.  
-6. `!!cfg set barBarFoo 789`: Change line 6 value to 789.  
-7. `!!cfg write`: Save changes.  
-8. `!!cfg quit`: Exit file.  
+1. `!!cfg env "config/foo/" bar.json`: Open the file
+2. `!!cfg set foo 1231`: Set the value on line 2 to 1231
+3. `!!cfg set bar.barFoo "!": Set the value on line 4 to "!"
+4. `!!cfg rm buzz.1`: Remove the second item in the list on line 10 (0-based index)
+5. `!!cfg cd bar.barBar`: Change the pointer to the object on line 5
+6. `!!cfg set barBarFoo 789`: Set the value on line 6 to 789
+7. `!!cfg write`: Write the file
+8. `!!cfg quit`: Exit the file
 
-Modified configuration file:  
+Modified configuration file:
 
 ```json
 1  {
@@ -122,30 +135,30 @@ Modified configuration file:
 10         "wangyupu"
 11     ]
 12 }
-```  
+```
 
-## Plugin Configuration  
+## Plugin Configuration
 
 ```yaml
-ownerPlayer: player_name
+ownerPlayer: PlayerName
 cfgCmdPermission: 4
 allowModifyConfig: true
 allowOutBound: false
 enableLog: true
 onlyOwnerPlayer: false
-```  
+```
 
-- `ownerPlayer`: The specified player bypasses all security controls. Leave it empty to enforce permission checks for all players.  
-- `allowModifyConfig`: Whether to allow modification of **this plugin's (`cfgcmd`) configuration**.  
-- `allowOutBound`: Whether to allow access outside the `MCDR` root directory. When `false`, access is limited to the `MCDR` directory.  
-- `enableLog`: Whether to enable logging. Logs are saved in *MCDR root path* `/logs/cfgcmdLogs/<YYYY>-<mm>-<dd>_<COUNT>.log`.  
-- `onlyOwnerPlayer`: Whether only the specified `ownerPlayer` can use this plugin.  
+- `ownerPlayer`: The player specified here bypasses all security controls. Leave it empty to apply permission control to all authorized players.
+- `allowModifyConfig`: Determines whether the configuration of **this plugin (`cfgcmd`)** can be modified.
+- `allowOutBound`: Determines whether accessing files outside the MCDR root path is allowed. When set to `false`, only files within the MCDR path are accessible.
+- `enableLog`: Determines whether to enable logging, which will be saved in the *MCDR root path*/logs/cfgcmdLogs/<YYYY>-<mm>-<dd>_<COUNT>.log.
+- `onlyOwnerPlayer`: Determines whether only the specified `ownerPlayer` is allowed to use this plugin.
 
-> `allowModifyConfig` defaults to `true` to allow administrators to configure the plugin without backend access. It is recommended to set this to `false` after installation.  
+> `allowModifyConfig` defaults to `true` to allow administrators to safely configure the plugin when they cannot access the backend. It is recommended to manually set it to `false` after installation.
 
-## Supported Configuration File Formats  
+## Supported Configuration File Formats
 
-- `json`  
-- `yaml` (`yml`)  
-- `toml`  
-- Plain text  
+- `json`
+- `yaml` (`yml`)
+- `toml`
+- Plain text

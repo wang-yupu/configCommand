@@ -302,3 +302,9 @@ def editorDelete(source: CommandSource, ctx: CommandContext):
     if not allowCloudFunction():
         source.reply("配置文件禁止使用云服务")
         return
+
+    player = getPlayerObject(source)
+
+    log(f"[Editor] [{getStorageName(source)}] [{getTimeString()}] [{player.file}] delete a editor session")
+
+    player.deleteSession(source.reply)

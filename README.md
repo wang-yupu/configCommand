@@ -2,8 +2,11 @@
 # configCommand / cfgcmd
 
 [English](/README_en.md)
+[Link](https://cfgcmd.wangyupu.com)
 
 在游戏内使用MCDR命令修改其它插件/Mod的配置！
+
+**`1.3.1`版本支持在线编辑器!**
 
 ## 权限
 
@@ -33,6 +36,14 @@
 - `!!cfg lsDir <路径>`: 以MCDR目录为根目录查看文件列表
 - `!!cfg rmFile <文件>`: 删除文件 (**无法撤销**)
 - `!!cfg touchFile <文件>`: 创建**空**文件
+
+---  
+
+- `!!cfg editor`: 打开当前文件的在线编辑器，需要配置`enableCloud`为`true`
+- `!!cfg editorApply`: 从云端同步已经修改的配置文件
+- `!!cfg editorDelete`: 删除云端的会话
+
+> 从`1.3.1`版本以下升级过来的，需要手动为配置文件添加`enableCloud`为`true`才能使用在线编辑器
 
 ---  
 
