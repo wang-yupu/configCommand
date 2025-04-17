@@ -31,6 +31,7 @@ def registerAllCommands(serverInstance: PluginServerInterface):
         .then(Literal("info").runs(infoFile))\
         .then(Literal("set").then(QuotableText("key").runs(setKV).then(GreedyText("value").runs(setKV))))\
         .then(Literal("setTyped").then(QuotableText("key").then(Enumeration("type", TypeEnum).then(GreedyText("value").runs(setKVTyped)))))\
+        .then(Literal("append").then(QuotableText("key").then(GreedyText("value").runs(KVAppend))))\
         .then(Literal("rm").then(GreedyText('key').runs(rmKV)))\
         .then(Literal("mv").then(QuotableText('key1').then(QuotableText('key2').runs(mvKV))))\
         .then(Literal("cp").then(QuotableText('key1').then(QuotableText('key2').runs(cpKV))))\
@@ -39,6 +40,9 @@ def registerAllCommands(serverInstance: PluginServerInterface):
         .then(Literal("lsLong").runs(lsKV).then(Integer('page').then(Integer('linePerPage').runs(lsKV).then(GreedyText('key').runs(lsKV)))))\
         .then(Literal("lsDir").runs(lsDir).then(GreedyText("path").runs(lsDir)))\
         .then(Literal("rmFile").then(GreedyText("file").runs(rmFile)))\
-        .then(Literal("touch").then(GreedyText("file").runs(touchFile)))
+        .then(Literal("touch").then(GreedyText("file").runs(touchFile)))\
+        .then(Literal("editor").runs(startEditor))\
+        .then(Literal("editorApply").runs(editorApplyChanges))\
+        .then(Literal("editorDelete").runs(editorDelete))
 
     serverInstance.register_command(tree)

@@ -3,8 +3,8 @@ from mcdreforged.command.command_source import CommandSource
 from mcdreforged.command.builder.common import CommandContext
 
 from .utils import *
-from ..playerEnv import TypeNotValidError
-from ..security import log
+from ..playerEnv import TypeNotValidError, applyResult
+from ..security import log, allowCloudFunction
 
 import os.path
 
@@ -69,6 +69,22 @@ def setKVTyped(source: CommandSource, ctx: CommandContext):
     else:
         source.reply(
             green(f"将 {ctx.get("key")} 由 {old} 修改为 {value}，指定了类型: {ctx.get('type').name} {'('+ext+')' if ext else ''}"))
+
+
+def KVAppend(source: CommandSource, ctx: CommandContext):
+    if not verifyPermission(source):
+        source.reply(red("你没有足够的权限以使用此命令！"))
+        return
+
+    if not getObjectExists(source):
+        source.reply(red("文件未加载"))
+        return
+
+    player = getPlayerObject(source)
+
+    obj = player.get(ctx.get('key'))
+    if isinstance(obj, str):
+        obj2 = obj + ctx.get("value")
 
 
 def rmKV(source: CommandSource, ctx: CommandContext):
@@ -222,3 +238,67 @@ def lsDir(source: CommandSource, ctx: CommandContext):
         source.reply(t)
     except:
         source.reply(red("出错"))
+
+
+def startEditor(source: CommandSource, ctx: CommandContext):
+    if not verifyPermission(source):
+        source.reply(red("你没有足够的权限以使用此命令！"))
+        return
+
+    if not getObjectExists(source):
+        source.reply(red("文件未加载"))
+        return
+
+    if not allowCloudFunction():
+        source.reply("配置文件禁止使用云服务")
+        return
+
+    player = getPlayerObject(source)
+
+    log(f"[Editor] [{getStorageName(source)}] [{getTimeString()}] [{player.file}] start a new editor session.")
+
+    result = player.startSession(source.reply)
+    if result == 0:
+        source.reply(red("还存在未保存的修改，使用")+darkred("!!cfg write (保存修改)")+red("或")+darkred("!!cfg reload (丢弃修改)"))
+    elif result == 1:
+        source.reply(red("已经打开了一个编辑器会话"))
+        url = player.cloudSession.getEditorURL()
+        urlRText = RText.from_json_object({"text": url, "color": 'blue', "underlined": True,
+                                          "clickEvent": {"action": "open_url", "value": url}})
+        source.reply(RText("当前会话链接: ", RColor.green)+urlRText+RText("(点击以打开)", RColor.gray))
+    elif result == 4:
+        source.reply(red("文件过大，需要小于8MiB才可使用在线编辑器"))
+
+
+def editorApplyChanges(source: CommandSource, ctx: CommandContext):
+    if not verifyPermission(source):
+        source.reply(red("你没有足够的权限以使用此命令！"))
+        return
+
+    if not getObjectExists(source):
+        source.reply(red("文件未加载"))
+        return
+
+    if not allowCloudFunction():
+        source.reply("配置文件禁止使用云服务")
+        return
+
+    player = getPlayerObject(source)
+
+    log(f"[Editor] [{getStorageName(source)}] [{getTimeString()}] [{player.file}] apply changes from editor")
+
+    player.applyChanges(source.reply)
+
+
+def editorDelete(source: CommandSource, ctx: CommandContext):
+    if not verifyPermission(source):
+        source.reply(red("你没有足够的权限以使用此命令！"))
+        return
+
+    if not getObjectExists(source):
+        source.reply(red("文件未加载"))
+        return
+
+    if not allowCloudFunction():
+        source.reply("配置文件禁止使用云服务")
+        return

@@ -7,6 +7,7 @@ from .utils import *
 from ..fileHandler import HandlerEnum, json, yaml, toml, plain
 from ..playerEnv import Player, NoPermissionError
 from ..shared.playerEnv import players
+from ..security import allowCloudFunction
 
 import os.path
 
@@ -20,6 +21,8 @@ def printHelp(source: CommandSource, ctx: CommandContext):
     source.reply(orange("基本: ")+white("env quit write reload info"))
     source.reply(orange("键值对操作: ")+white("set setTyped rm mv cp cd ls"))
     source.reply(orange("文件操作: ")+white("lsDir rmFile touchFile"))
+    if allowCloudFunction():
+        source.reply(orange("在线编辑器: ")+white("editor editorApply editorDelete"))
 
 
 def loadEnv(source: CommandSource, ctx: CommandContext):

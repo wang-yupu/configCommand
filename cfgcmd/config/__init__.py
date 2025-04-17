@@ -8,7 +8,8 @@ defaultConfig = {
     "cfgCmdPermission": 4,
     "allowModifyConfig": True,
     "allowOutBound": False,
-    "enableLog": True
+    "enableLog": True,
+    "enableCloud": True
 }
 
 

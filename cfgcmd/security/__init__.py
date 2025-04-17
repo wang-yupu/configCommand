@@ -13,10 +13,11 @@ class PermissionResult(Enum):
     PASS = 0
     NotAllowConfigThisPlugin = 1
     NotAllowOutBound = 2
+    NotInAllowList = 3
 
 
-def verifyFilePermission(targetFile, opPlayerName):
-    psi: PluginServerInterface = PluginServerInterface.psi()
+def verifyFilePermission(targetFile, opPlayerName, providePIS=None):
+    psi: PluginServerInterface = providePIS if providePIS else PluginServerInterface.psi()
     if opPlayerName == "<CONSOLE>" or opPlayerName == config.cfg.get('ownerPlayer', None):
         return PermissionResult.PASS  # 永远有权限
 
@@ -34,6 +35,10 @@ def verifyFilePermission(targetFile, opPlayerName):
             return PermissionResult.NotAllowOutBound
 
     return PermissionResult.PASS
+
+
+def allowCloudFunction() -> bool:
+    return config.cfg.get('enableCloud', False)
 
 
 def log(message):
