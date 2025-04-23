@@ -1,8 +1,8 @@
 
 # configCommand / cfgcmd
 
-[English](/README_en.md)
-[Link](https://cfgcmd.wangyupu.com)
+[English](/README_en.md)  
+[Link](https://cfgcmd.wangyupu.com)  
 
 在游戏内使用MCDR命令修改其它插件/Mod的配置！
 
@@ -144,6 +144,7 @@ allowModifyConfig: true
 allowOutBound: false
 enableLog: true
 onlyOwnerPlayer: false
+enableCloud: true
 ```
 
 `ownerPlayer`指定的玩家绕过所有安全控制措施。将其留空以对所有有权限的玩家进行权限控制  
@@ -153,6 +154,7 @@ onlyOwnerPlayer: false
 `onlyOwnerPlayer`指定是否只允许被指定的`ownerPlayer`才能使用此插件  
 
 > `allowModifyConfig`默认为`true`是为了管理员于无法访问后台的情况下也能对插件进行安全配置，建议安装后手动将其改为`false`  
+> `enableCloud`在`1.3.1`版本前不存在，因此升级到`1.3.1+`版本时需要自行添加此配置以允许编辑器会话
 
 ## 支持的配置文件格式
 
