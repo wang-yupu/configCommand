@@ -24,6 +24,14 @@ def registerAllCommands(serverInstance: PluginServerInterface):
                                 )))
 
               )\
+        .then(Literal('envEditor')
+              .then(QuotableText("dir")
+                    .then(QuotableText("file").runs(loadEnvAndEditor)
+                          .then(Enumeration("rwMode", HandlerEnum)
+                                .runs(loadEnvAndEditor)
+                                )))
+
+              )\
         .then(Literal("quit").runs(quitEnv))\
         .then(Literal("write").runs(writeFile))\
         .then(Literal("wq").runs(wq))\

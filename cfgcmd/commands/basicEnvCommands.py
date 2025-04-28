@@ -8,6 +8,7 @@ from ..fileHandler import HandlerEnum, json, yaml, toml, plain
 from ..playerEnv import Player, NoPermissionError
 from ..shared.playerEnv import players
 from ..security import allowCloudFunction
+from .fileCommands import startEditor
 
 import os.path
 
@@ -23,6 +24,7 @@ def printHelp(source: CommandSource, ctx: CommandContext):
     source.reply(orange("文件操作: ")+white("lsDir rmFile touchFile"))
     if allowCloudFunction():
         source.reply(orange("在线编辑器: ")+white("editor editorApply editorDelete"))
+    source.reply(orange("快速命令: ")+white(f"{'envEditor ' if allowCloudFunction() else ''}wq"))
 
 
 def loadEnv(source: CommandSource, ctx: CommandContext):
@@ -76,6 +78,11 @@ def loadEnv(source: CommandSource, ctx: CommandContext):
         return
 
     source.reply(green(f"打开了配置文件: {file}，你现在可以对它进行操作了。记得使用`!!cfg write`保存"))
+
+
+def loadEnvAndEditor(source: CommandSource, ctx: CommandContext):
+    loadEnv(source, ctx)
+    startEditor(source, ctx)
 
 
 def quitEnv(source: CommandSource, ctx: CommandContext):
