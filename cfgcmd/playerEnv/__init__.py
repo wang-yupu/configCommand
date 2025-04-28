@@ -198,6 +198,7 @@ class Player:
                             self.write(content)
                         except Exception as error:
                             replyFunction(red("错误: "+error))
+                            self.lock.release()
                             return
                         self.load()
                         replyFunction(RText("成功更新内容", RColor.green))
@@ -209,6 +210,8 @@ class Player:
                                 replyFunction(red("遇到了限速，请稍后再试: 500 RPD , 80 RPH"))
                             case applyResult.UNREADY:
                                 replyFunction(red("会话还未就绪"))
+                            case applyResult.NETWORK:
+                                replyFunction(red("网络问题导致无法连接至服务器"))
                     self.lock.release()
                 else:
                     replyFunction(red("会话未就绪"))

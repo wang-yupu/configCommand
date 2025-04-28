@@ -9,6 +9,7 @@ class applyResult(Enum):
     EXPIRE = 1
     UNREADY = 2
     RATELIMIT = 3
+    NETWORK = 4
 
 
 class requestsResult(Enum):
@@ -74,6 +75,8 @@ class CloudSession:
                 requests.get, f"https://e1.yupu.dev/obj/read/{self.sessionID}", headers=self.headers)
             if response.status_code == 404:
                 return "", applyResult.EXPIRE
+            elif status == requestsResult.HTTPERROR or status == requestsResult.TIMEOUT:
+                return "", applyResult.NETWORK
             elif status != requestsResult.SUCCESS:
                 return "", applyResult.RATELIMIT
             else:
